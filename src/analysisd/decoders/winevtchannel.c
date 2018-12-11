@@ -56,7 +56,7 @@ int DecodeWinevt(Eventinfo *lf){
     int level_n, category;
     unsigned long long int keywords_n;
     XML_NODE node, child;
-    size_t num;
+    int num;
     char *level = NULL, *keywords = NULL, *provider_name = NULL,
         *msg_from_prov = NULL, *returned_event = NULL, *event = NULL;
     char *find_event = NULL, *end_event = NULL,
@@ -68,16 +68,16 @@ int DecodeWinevt(Eventinfo *lf){
     os_malloc(OS_MAXSTR, msg_from_prov);
 
     find_event = strstr(lf->log, "Event");
-
+    
     if(find_event){
         find_event = find_event + 8;
         end_event = strchr(find_event,'"');
         if(end_event){
             aux = *(end_event + 1);
             if(aux == '}' || aux == ','){
-                num = end_event-find_event;
+                num = abs(strlen(end_event) - strlen(find_event));
                 memcpy(event, find_event, num);
-                event[num] = '\0';               
+                event[num] = '\0';
             }
             find_event = '\0';
             end_event = '\0';
@@ -226,7 +226,7 @@ int DecodeWinevt(Eventinfo *lf){
         if(end_msg){
             aux = *(end_msg + 1);
             if(aux == '}' || aux == ','){
-                num = end_msg-find_msg;
+                num = abs(strlen(end_msg) - strlen(find_msg));
                 memcpy(msg_from_prov, find_msg, num);
                 msg_from_prov[num] = '\0';
                 cJSON_AddStringToObject(json_system_in, "Message", msg_from_prov);
@@ -259,10 +259,6 @@ int DecodeWinevt(Eventinfo *lf){
     free(keywords);
     free(provider_name);
     free(msg_from_prov);
-    free(find_event);
-    free(end_event);
-    free(find_msg);
-    free(end_msg);
     free(returned_event);
     OS_ClearXML(&xml);
     cJSON_Delete(final_event);

@@ -750,7 +750,7 @@ void send_channel_event_json(EVT_HANDLE evt, os_channel *channel)
             end_prov = strchr(beg_prov+1, '\'');
 
             if (end_prov){
-                num = end_prov-1-beg_prov;
+                num = abs(strlen(end_prov) - strlen(beg_prov) - 1);
 
                 memcpy(provider_name, beg_prov+1, num);
                 provider_name[num] = '\0';
@@ -773,7 +773,7 @@ void send_channel_event_json(EVT_HANDLE evt, os_channel *channel)
             avoid_dup = strchr(msg_from_prov, '\r');
 
             if (avoid_dup){
-                num = avoid_dup - msg_from_prov;
+                num = abs(strlen(avoid_dup) - strlen(msg_from_prov));
                 memcpy(filtered_msg, msg_from_prov, num);
                 filtered_msg[num] = '\0';
                 cJSON_AddStringToObject(event_json, "Message", filtered_msg);
@@ -798,13 +798,9 @@ void send_channel_event_json(EVT_HANDLE evt, os_channel *channel)
 cleanup:
     free(msg_from_prov);
     free(xml_event);
-    free(filtered_msg);
     free(avoid_dup);
     free(msg_sent);
     free(properties_values);
-    free(beg_prov);
-    free(end_prov);
-    free(find_prov);
     free(provider_name);
     free(wprovider_name);
     cJSON_Delete(event_json);
